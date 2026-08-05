@@ -25,7 +25,7 @@ export function LoginModal() {
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={closeLoginModal}>
           <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
             className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden" onClick={(e) => e.stopPropagation()}>
-            <div className="bg-gradient-to-r from-brand-600 to-glow-600 p-6 relative">
+            <div className="bg-brand-800 p-6 relative">
               <button onClick={closeLoginModal} className="absolute top-4 right-4 p-1 text-white/50 hover:text-white rounded-full hover:bg-white/10"><FiX size={18} /></button>
               <h2 className="text-xl font-black text-white">Sign In</h2>
               <p className="text-white/60 text-xs mt-0.5">Welcome to Micro Machines</p>

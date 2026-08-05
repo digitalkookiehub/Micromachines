@@ -71,7 +71,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
             disabled={isOutOfStock} onClick={() => onAddToCart?.(product.id)}
             className={`w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${
               isOutOfStock ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : 'bg-gradient-to-r from-brand-500 to-glow-500 text-white shadow-md shadow-brand-200 hover:shadow-lg hover:shadow-brand-300'
+              : 'bg-accent-600 text-white shadow-md shadow-accent-200 hover:bg-accent-700 hover:shadow-lg hover:shadow-accent-300'
             }`}>
             <FiShoppingCart size={14} />
             {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}

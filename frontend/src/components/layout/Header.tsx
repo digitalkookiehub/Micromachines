@@ -13,12 +13,12 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50">
       {isDealer && user?.dealer_profile && (
-        <div className="bg-glow-600 text-white py-1 px-4 text-xs text-center font-semibold">
+        <div className="bg-brand-900 text-white py-1 px-4 text-xs text-center font-semibold">
           {user.dealer_profile.company_name} | {user.dealer_profile.dealer_id} | {user.dealer_profile.tier} Tier
         </div>
       )}
 
-      <div className="bg-gradient-to-r from-brand-700 via-brand-600 to-glow-600 text-white shadow-lg">
+      <div className="bg-brand-800 text-white shadow-lg">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4">
           <Link to="/" className="flex items-center gap-2.5 flex-shrink-0">
             <img src="/logo.svg" alt="Micro Machines" className="h-10 w-auto" />

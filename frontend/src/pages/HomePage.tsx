@@ -41,11 +41,11 @@ export function HomePage() {
       <div className="bg-white border-b border-gray-200 sticky top-[60px] z-40 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-3 flex gap-2 overflow-x-auto">
           <Link to="/"><motion.button whileTap={{ scale: 0.95 }}
-            className={`px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${!category ? 'bg-gradient-to-r from-brand-500 to-glow-500 text-white shadow-md shadow-brand-200' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>All</motion.button></Link>
+            className={`px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${!category ? 'bg-accent-600 text-white shadow-md shadow-accent-200' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>All</motion.button></Link>
           {categories.map((c) => (
             <Link key={c.value} to={`/?category=${c.value}`}><motion.button whileTap={{ scale: 0.95 }}
               className={`flex items-center gap-1.5 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${
-                category === c.value ? 'bg-gradient-to-r from-brand-500 to-glow-500 text-white shadow-md shadow-brand-200' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+                category === c.value ? 'bg-accent-600 text-white shadow-md shadow-accent-200' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
               {c.emoji} {c.label}
             </motion.button></Link>
           ))}
@@ -55,7 +55,7 @@ export function HomePage() {
       {/* Dealer Banner - always visible for customers & guests */}
       {user && (user.role === 'dealer' || user.role === 'admin') && (
         <div className="max-w-7xl mx-auto px-4 pt-6">
-          <div className="bg-gradient-to-r from-brand-600 to-glow-600 rounded-2xl p-8 text-center shadow-lg shadow-brand-200">
+          <div className="bg-brand-800 rounded-2xl p-8 text-center shadow-lg shadow-brand-200">
             <h3 className="text-2xl font-black text-white mb-2">Unlock Dealer Pricing</h3>
             <p className="text-white/70 text-sm mb-5">Register as a dealer to get wholesale rates, AI tools & GST invoicing</p>
             <Link to="/register"><motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
@@ -146,7 +146,7 @@ function Pagination({ page, pages, onPage }: { page: number; pages: number; onPa
   return <div className="flex justify-center gap-2 mt-8">
     {page > 1 && <button onClick={() => onPage(page - 1)} className="px-4 py-2 border border-gray-200 rounded-xl text-sm bg-white hover:bg-gray-50 font-semibold text-gray-600">Prev</button>}
     {Array.from({ length: Math.min(pages, 7) }, (_, i) => i + 1).map((p) => (
-      <button key={p} onClick={() => onPage(p)} className={`w-10 h-10 rounded-xl text-sm font-bold ${p === page ? 'bg-gradient-to-r from-brand-500 to-glow-500 text-white shadow-md shadow-brand-200' : 'bg-white border border-gray-200 hover:bg-gray-50 text-gray-600'}`}>{p}</button>
+      <button key={p} onClick={() => onPage(p)} className={`w-10 h-10 rounded-xl text-sm font-bold ${p === page ? 'bg-accent-600 text-white shadow-md shadow-accent-200' : 'bg-white border border-gray-200 hover:bg-gray-50 text-gray-600'}`}>{p}</button>
     ))}
     {page < pages && <button onClick={() => onPage(page + 1)} className="px-4 py-2 border border-gray-200 rounded-xl text-sm bg-white hover:bg-gray-50 font-semibold text-gray-600">Next</button>}
   </div>;
