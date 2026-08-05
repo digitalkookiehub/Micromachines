@@ -1,8 +1,11 @@
-import { motion } from 'framer-motion';
-import { type ButtonHTMLAttributes, type ReactNode } from 'react';
+import { motion, type HTMLMotionProps } from 'framer-motion';
+import { type ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
-interface GradientButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+// Extends motion's own button props rather than React's ButtonHTMLAttributes:
+// motion.button redefines onAnimationStart/onDrag* with animation semantics,
+// which conflict with the DOM event handler signatures.
+interface GradientButtonProps extends Omit<HTMLMotionProps<'button'>, 'ref'> {
   children: ReactNode;
   variant?: 'primary' | 'dealer' | 'danger' | 'outline' | 'success' | 'gold';
   size?: 'sm' | 'md' | 'lg';

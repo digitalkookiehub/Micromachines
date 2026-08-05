@@ -5,6 +5,10 @@ alembic>=1.13.0
 psycopg2-binary>=2.9.9
 python-jose[cryptography]>=3.3.0
 passlib[bcrypt]>=1.7.4
+# passlib 1.7.4 (last released 2020) probes bcrypt with an over-length secret on
+# first use; bcrypt >=4.1 raises ValueError instead of truncating, which breaks
+# all password hashing. Pin to the last version passlib can drive.
+bcrypt==4.0.1
 python-multipart>=0.0.6
 httpx>=0.26.0
 pydantic>=2.5.0

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { FiArrowLeft, FiToggleLeft, FiToggleRight, FiAlertTriangle, FiSearch, FiEdit2, FiCheck, FiX, FiSave } from 'react-icons/fi';
+import { FiArrowLeft, FiToggleLeft, FiToggleRight, FiAlertTriangle, FiSearch, FiEdit2, FiCheck, FiX } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { formatCurrency } from '@/lib/utils';

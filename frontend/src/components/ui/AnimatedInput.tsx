@@ -1,8 +1,9 @@
-import { motion } from 'framer-motion';
-import { type InputHTMLAttributes, forwardRef } from 'react';
+import { motion, type HTMLMotionProps } from 'framer-motion';
+import { forwardRef } from 'react';
 import { cn } from '@/lib/utils';
 
-interface AnimatedInputProps extends InputHTMLAttributes<HTMLInputElement> {
+// See GradientButton: motion's animation/drag props conflict with the DOM ones.
+interface AnimatedInputProps extends Omit<HTMLMotionProps<'input'>, 'ref'> {
   label?: string;
   error?: string;
 }
