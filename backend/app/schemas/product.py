@@ -122,7 +122,7 @@ class PaginatedResponse(BaseModel):
 
 def serialize_product_for_role(product, user=None) -> dict:
     """CRITICAL: Serialize product with only role-appropriate pricing."""
-    from app.models.user import UserRole
+    from app.services.pricing import get_effective_price, sees_dealer_pricing
 
     base = {
         "id": product.id,
@@ -140,33 +140,16 @@ def serialize_product_for_role(product, user=None) -> dict:
         "created_at": product.created_at.isoformat() if product.created_at else None,
     }
 
-    is_approved_dealer = (
-        user
-        and user.role == UserRole.dealer
-        and user.dealer_profile
-        and user.dealer_profile.is_approved
-    )
-    is_admin = user and user.role == UserRole.admin
+    # Price shown must equal the price charged — cart and checkout use this same helper
+    price = float(get_effective_price(product, user))
 
-    if is_approved_dealer or is_admin:
-        dealer_price = float(product.dealer_price)
+    if sees_dealer_pricing(user):
         mrp = float(product.customer_price)
-
-        # Apply dealer-specific special discount if set
-        if (
-            is_approved_dealer
-            and user.dealer_profile
-            and user.dealer_profile.special_discount
-            and float(user.dealer_profile.special_discount) > 0
-        ):
-            extra_discount = float(user.dealer_profile.special_discount) / 100
-            dealer_price = round(dealer_price * (1 - extra_discount), 2)
-
-        savings = mrp - dealer_price
+        savings = mrp - price
         savings_pct = (savings / mrp * 100) if mrp > 0 else 0
         return {
             **base,
-            "price": dealer_price,
+            "price": price,
             "mrp": mrp,
             "savings_percent": round(savings_pct, 1),
             "savings_amount": round(savings, 2),
@@ -175,6 +158,6 @@ def serialize_product_for_role(product, user=None) -> dict:
     else:
         return {
             **base,
-            "price": float(product.customer_price),
+            "price": price,
             "tax_label": "Inclusive of all taxes",
         }

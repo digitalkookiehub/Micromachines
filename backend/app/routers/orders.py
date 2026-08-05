@@ -16,6 +16,7 @@ from app.models.user import DealerTier, User, UserRole
 from app.routers.credit import TIER_TERMS_DAYS, get_used_credit
 from app.schemas.order import CreateOrderRequest, OrderResponse, PaymentInitResponse
 from app.services.payment import create_razorpay_order
+from app.services.pricing import get_effective_price
 from app.tasks.product_tasks import generate_invoice_pdf, send_notification_email
 from app.utils import generate_order_number
 
@@ -25,9 +26,8 @@ router = APIRouter(prefix="/orders", tags=["orders"])
 
 
 def _get_role_price(product: Product, user: User) -> Decimal:
-    if user.role == UserRole.dealer and user.dealer_profile and user.dealer_profile.is_approved:
-        return product.dealer_price
-    return product.customer_price
+    """Charged price for this user — identical to the price shown in catalogue and cart."""
+    return get_effective_price(product, user)
 
 
 @router.post("", response_model=OrderResponse, status_code=201)

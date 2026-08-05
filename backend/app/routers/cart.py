@@ -1,4 +1,5 @@
 import logging
+from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -7,23 +8,18 @@ from app.auth.dependencies import get_current_user
 from app.database import get_db
 from app.models.cart import Cart, CartItem
 from app.models.product import Product
-from app.models.user import User, UserRole
+from app.models.user import User
 from app.schemas.cart import AddToCartRequest, CartResponse, CartItemResponse, UpdateCartItemRequest
+from app.services.pricing import get_effective_price
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/cart", tags=["cart"])
 
 
-def _get_role_price(product: Product, user: User) -> float:
-    """Get the appropriate price based on user role."""
-    if (
-        user.role == UserRole.dealer
-        and user.dealer_profile
-        and user.dealer_profile.is_approved
-    ):
-        return float(product.dealer_price)
-    return float(product.customer_price)
+def _get_role_price(product: Product, user: User) -> Decimal:
+    """Price this user pays — identical to the catalogue price and the order line."""
+    return get_effective_price(product, user)
 
 
 def _get_or_create_cart(user: User, db: Session) -> Cart:
@@ -37,7 +33,7 @@ def _get_or_create_cart(user: User, db: Session) -> Cart:
 
 def _build_cart_response(cart: Cart, user: User, db: Session) -> CartResponse:
     items = []
-    subtotal = 0.0
+    subtotal = Decimal("0")
     for ci in cart.items:
         product = db.query(Product).filter(Product.id == ci.product_id).first()
         if not product:
@@ -51,13 +47,13 @@ def _build_cart_response(cart: Cart, user: User, db: Session) -> CartResponse:
             product_name=product.name,
             product_image=product.image_url,
             quantity=ci.quantity,
-            price=price,
-            total=round(total, 2),
+            price=float(price),
+            total=float(total),
         ))
     return CartResponse(
         id=cart.id,
         items=items,
-        subtotal=round(subtotal, 2),
+        subtotal=float(subtotal),
         item_count=len(items),
     )
 
