@@ -102,3 +102,45 @@ def test_logout(client, customer_token):
     response = client.post("/api/v1/auth/logout")
     assert response.status_code == 200
     assert response.json()["message"] == "Logged out successfully"
+
+
+def test_refresh_reads_cookie(client, test_customer):
+    """The refresh token is read from the HTTP-only cookie, not a query param."""
+    login = client.post("/api/v1/auth/login", data={
+        "username": "customer@test.com",
+        "password": "password123",
+    })
+    assert login.status_code == 200
+
+    response = client.post("/api/v1/auth/refresh")
+    assert response.status_code == 200
+    assert response.json()["message"] == "Token refreshed"
+    assert "access_token" in response.cookies
+
+
+def test_refresh_without_cookie(client):
+    response = client.post("/api/v1/auth/refresh")
+    assert response.status_code == 401
+
+
+def test_refresh_rejected_after_logout(client, test_customer):
+    """Logout revokes the stored token so it can no longer buy a new access token."""
+    client.post("/api/v1/auth/login", data={
+        "username": "customer@test.com",
+        "password": "password123",
+    })
+    assert client.post("/api/v1/auth/logout").status_code == 200
+
+    response = client.post("/api/v1/auth/refresh")
+    assert response.status_code == 401
+
+
+def test_register_cannot_self_assign_admin(client):
+    """The role field is client-supplied; admin must not be obtainable via register."""
+    response = client.post("/api/v1/auth/register", json={
+        "email": "wannabe-admin@test.com",
+        "password": "password123",
+        "full_name": "Wannabe Admin",
+        "role": "admin",
+    })
+    assert response.status_code == 403

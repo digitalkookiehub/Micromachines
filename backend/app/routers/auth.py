@@ -1,8 +1,7 @@
 import logging
-import secrets
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
@@ -27,7 +26,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 COOKIE_SETTINGS = {
     "httponly": True,
     "samesite": "lax",
-    "secure": False,  # Set True in production with HTTPS
+    "secure": settings.COOKIE_SECURE,
     "path": "/",
 }
 
@@ -35,6 +34,10 @@ COOKIE_SETTINGS = {
 @router.post("/register", response_model=UserResponse, status_code=201)
 async def register(req: RegisterRequest, db: Session = Depends(get_db)):
     """Register a new customer or dealer account."""
+    # role is client-supplied; admin must never be self-assignable over the API.
+    if req.role == UserRole.admin:
+        raise HTTPException(status_code=403, detail="Admin accounts cannot be self-registered")
+
     existing = db.query(User).filter(User.email == req.email).first()
     if existing:
         raise HTTPException(status_code=409, detail="Email already registered")
@@ -86,9 +89,11 @@ async def login(
     access_token = create_access_token({"sub": str(user.id)})
     refresh_token_str = create_refresh_token({"sub": str(user.id)})
 
+    # Store the token that is actually handed to the browser, so /refresh can
+    # look it up and honour revocation.
     db_refresh = RefreshToken(
         user_id=user.id,
-        token=secrets.token_urlsafe(64),
+        token=refresh_token_str,
         expires_at=datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
     )
     db.add(db_refresh)
@@ -112,20 +117,32 @@ async def login(
 
 
 @router.post("/refresh", response_model=MessageResponse)
-async def refresh_token(
+async def refresh_access_token(
     response: Response,
-    refresh_token: str | None = None,
+    refresh_token: str | None = Cookie(default=None),
     db: Session = Depends(get_db),
 ):
-    """Refresh access token using refresh token cookie."""
-    from fastapi import Cookie as CookieDep
-    # The refresh_token comes from cookie
+    """Refresh access token using the refresh_token HTTP-only cookie."""
     if not refresh_token:
         raise HTTPException(status_code=401, detail="No refresh token")
 
     payload = decode_token(refresh_token)
     if not payload or payload.get("type") != "refresh":
         raise HTTPException(status_code=401, detail="Invalid refresh token")
+
+    stored = (
+        db.query(RefreshToken)
+        .filter(RefreshToken.token == refresh_token, RefreshToken.revoked.is_(False))
+        .first()
+    )
+    if not stored:
+        raise HTTPException(status_code=401, detail="Refresh token revoked")
+
+    expires_at = stored.expires_at
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+    if expires_at <= datetime.now(timezone.utc):
+        raise HTTPException(status_code=401, detail="Refresh token expired")
 
     user_id = payload.get("sub")
     user = db.query(User).filter(User.id == int(user_id)).first()
