@@ -14,7 +14,9 @@ build/
 node_modules/
 dist/
 .cache/
-
+.claude/
+agents/
+skills/
 # Environment
 .env
 .env.local
